@@ -1,11 +1,11 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 const app = express();
 const uuid = require('./public/helpers/uuid.js');
 
-const noteData = require('./public/db/notes.json');
+const noteData = require('./public/api/notes.json');
 //boiler plate middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -47,7 +47,7 @@ app.post('/api/notes', (req, res) => {
         console.log(response);
         res.status(201).json(response);
 
-        fs.readFile('./public/db/notes.json', 'utf8', (err, data) => {
+        fs.readFile('./public/api/notes.json', 'utf8', (err, data) => {
             if (err) {
                 console.log(err);
             } else {
@@ -55,7 +55,7 @@ app.post('/api/notes', (req, res) => {
 
                 parsedNotes.push(newNote);
 
-                fs.writeFile('./public/db/notes.json',
+                fs.writeFile('./public/api/notes.json',
                     JSON.stringify(parsedNotes, null, 4),
                     (err) => {
                         console.log(err);
@@ -69,19 +69,14 @@ app.post('/api/notes', (req, res) => {
     }
 })
 
-app.delete('/api/notes/:id', (req, res) => {
-    
-    fs.readFile('./public/db/notes.json', 'utf8', (err, data) => {
-        const requestedNoteId = req.params.id
-
-        if (requestedNoteId == data.noteId){
-            res.send(noteData.splice(requestedNoteId))
-        } else if(!data.id){
-            console.log('note does not exist')
-            console.log(err);
-        }
+ app.delete('/api/notes/:id', (req, res) => {
+    let paramId = req.params.id;
+    let id = `http://localhost:${PORT}/api/notes/${paramId}`;
+    res.status(200).send();
     })
-})
+     
+ 
+
 
 app.listen(PORT, () => {
     console.log(`listening on http://localhost:${PORT}`);
